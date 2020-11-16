@@ -10,6 +10,8 @@ Algorithms implemented:
 * Insertion Sort
 * Selection Sort
 * Quick Sort
+* Heap Sort
+* Merge Sort
 
 
 ## Generating Data

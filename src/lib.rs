@@ -170,6 +170,114 @@ impl Sorter for QuickSort {
     }
 }
 
+/// Heap sort
+///
+/// The Heapsort algorithm involves preparing the list by first turning it into a max heap.
+/// The algorithm then repeatedly swaps the first value of the list with the last value,
+/// decreasing the range of values considered in the heap operation by one, and sifting
+/// the new first value into its position in the heap. This repeats until the range of
+/// considered values is one value in length.
+pub struct HeapSort;
+
+impl HeapSort {
+    fn heapify<T: Ord>(slice: &mut [T]) {
+        let parent = |i| (i - 1) / 2;
+        let mut start = parent(slice.len() - 1) as i64;
+        while start >= 0 {
+            HeapSort::sift_down(slice, start as usize, slice.len() - 1);
+            start -= 1;
+        }
+    }
+    fn sift_down<T: Ord>(slice: &mut [T], start: usize, end: usize) {
+        let left_child = |i| 2 * i + 1;
+        let mut root = start;
+        while left_child(root) <= end {
+            let child = left_child(root);
+            let mut swap = root;
+            if slice[swap] < slice[child] {
+                swap = child;
+            }
+            if child + 1 <= end && slice[swap] < slice[child + 1] {
+                swap = child + 1;
+            }
+            if swap == root {
+                return;
+            }
+            slice.swap(root, swap);
+            root = swap;
+        }
+    }
+}
+
+impl Sorter for HeapSort {
+    fn sort<T>(&self, slice: &mut [T])
+    where
+        T: Ord,
+    {
+        if slice.is_empty() || slice.len() == 1 {
+            return;
+        }
+        HeapSort::heapify(slice);
+        let mut end = slice.len() - 1;
+        while end > 0 {
+            slice.swap(0, end);
+            end -= 1;
+            HeapSort::sift_down(slice, 0, end);
+        }
+    }
+}
+
+/// Merge sort
+///
+/// Conceptually, a merge sort works as follows:
+///
+/// - Divide the unsorted list into n sublists, each containing one element
+///   (a list of one element is considered sorted).
+/// - Repeatedly merge sublists to produce new sorted sublists until there is only one
+///   sublist remaining. This will be the sorted list.
+pub struct MergeSort;
+
+impl MergeSort {
+    fn merge_sort<T: Ord>(slice: &mut [T], left: usize, right: usize) {
+        if left < right {
+            let mid = (left + right) / 2;
+            Self::merge_sort(slice, left, mid);
+            Self::merge_sort(slice, mid + 1, right);
+            Self::merge(slice, left, mid, right)
+        }
+    }
+    fn merge<T: Ord>(slice: &mut [T], mut start: usize, mut mid: usize, end: usize) {
+        let mut start2 = mid + 1;
+        if slice[mid] <= slice[start2] {
+            return;
+        }
+        while start <= mid && start2 <= end {
+            if slice[start] <= slice[start2] {
+                start += 1;
+            } else {
+                // shift elements by 1
+                slice[start..=start2].rotate_right(1);
+                // update markers
+                start += 1;
+                mid += 1;
+                start2 += 1;
+            }
+        }
+    }
+}
+
+impl Sorter for MergeSort {
+    fn sort<T>(&self, slice: &mut [T])
+    where
+        T: Ord,
+    {
+        if slice.is_empty() || slice.len() == 1 {
+            return;
+        }
+        Self::merge_sort(slice, 0, slice.len() - 1);
+    }
+}
+
 pub struct StdSorter;
 impl Sorter for StdSorter {
     fn sort<T>(&self, slice: &mut [T])
@@ -222,6 +330,20 @@ mod tests {
     fn quick_works() {
         let mut tings = vec![5, 1, 4, 2, 3];
         QuickSort.sort(&mut tings);
+        assert_eq!(tings, &[1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn heap_works() {
+        let mut tings = vec![5, 1, 4, 2, 3];
+        HeapSort.sort(&mut tings);
+        assert_eq!(tings, &[1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn merge_works() {
+        let mut tings = vec![5, 1, 4, 2, 3];
+        MergeSort.sort(&mut tings);
         assert_eq!(tings, &[1, 2, 3, 4, 5]);
     }
 }

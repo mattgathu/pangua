@@ -57,6 +57,10 @@ fn main() {
             println!("{} {} {} {}", "quick", n, took.0, took.1);
             let took = bench(StdSorter, &values, &counter);
             println!("{} {} {} {}", "std", n, took.0, took.1);
+            let took = bench(HeapSort, &values, &counter);
+            println!("{} {} {} {}", "heap", n, took.0, took.1);
+            let took = bench(MergeSort, &values, &counter);
+            println!("{} {} {} {}", "merge", n, took.0, took.1);
         }
     }
 }
